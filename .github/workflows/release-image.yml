@@ -1,0 +1,43 @@
+name: Publish company container
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run check
+      - run: npm run package:check
+      - run: docker build --tag scorekeeper-mcp:release .
+      - run: node tests/container-smoke.mjs scorekeeper-mcp:release
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Determine company image reference
+        id: image
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          test "$GITHUB_REPOSITORY_OWNER" = HatoUP
+          printf '%s' "$RELEASE_TAG" | grep -Eq '^v?[0-9]+\.[0-9]+\.[0-9]+$'
+          printf 'reference=ghcr.io/hatoup/scorekeeper-mcp:%s\n' "$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.image.outputs.reference }}
