@@ -130,6 +130,15 @@ are authoritative. Honor `Retry-After` and never rotate accounts to evade limits
 
 ## Containers and hosting
 
+Run the [published container](https://github.com/HatoUP/scorekeeper-mcp/pkgs/container/scorekeeper-mcp)
+without building it:
+
+```sh
+docker run --rm -i ghcr.io/hatoup/scorekeeper-mcp:v1.0.0
+```
+
+Or build from this repository:
+
 ```sh
 docker build -t scorekeeper-mcp .
 docker run --rm -i scorekeeper-mcp

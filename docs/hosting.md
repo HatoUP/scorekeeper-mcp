@@ -20,6 +20,14 @@ all users of a public connector.
 
 ## Stdio container
 
+The public image is `ghcr.io/hatoup/scorekeeper-mcp:v1.0.0`. It can be pulled
+without a GitHub account. The release build passed MCP initialization and ping
+with networking disabled in GitHub CI. Versioned image reference:
+
+```sh
+docker run --rm -i ghcr.io/hatoup/scorekeeper-mcp:v1.0.0
+```
+
 Build the root Dockerfile and run its default command. The image uses Node.js 22,
 installs locked dependencies, runs as `node`, writes MCP messages to stdout, and
 uses stderr for fixed diagnostics. No port or HTTP health URL is exposed.
